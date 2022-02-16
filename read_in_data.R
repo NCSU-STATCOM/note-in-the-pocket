@@ -68,9 +68,16 @@ for (i in 1:12) {
 
 orders2020_df <- do.call("rbind", orders2020)
 
+# changing McKinney Vento into binary variable 1 = yes, 0 = no
+orders2020_df$`McKinney Vento` <- ifelse(orders2020_df$`McKinney Vento` == "yes", 1, 0)
+
 saveRDS(orders2020_df, file = here("intermediary_data/orders2020_df.rds"))
 
 
+
+
+
+##########
 
 # Reading in 2021 data
 
