@@ -1,0 +1,114 @@
+---
+title: "EDA for the character variables"
+author: "Yinqiao Wang"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+options(knitr.graphics.auto_pdf = TRUE)
+knitr::opts_chunk$set(
+  fig.height = 8,
+  fig.width = 10,
+  collapse = TRUE,
+  fig.align = "center",
+  dpi = 600
+)
+library(dplyr)
+library(here)
+library(tidyr)
+library(ggplot2)
+library(ggrepel)
+library(choroplethrZip)
+library(ggmap)
+library(zipcodeR)
+```
+
+```{r, echo=FALSE}
+# Read in data sets
+orders_agg_Organization <- readRDS(here("intermediary_data/orders_agg_Organization.rds"))
+orders_agg_School <- readRDS(here("intermediary_data/orders_agg_School.rds"))
+orders_agg_City <- readRDS(here("intermediary_data/orders_agg_City.rds"))
+orders_agg_Zip <- readRDS(here("intermediary_data/orders_agg_Zip.rds"))
+```
+
+## Exploratory data analysis for character variables
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+# make a pie chart for top 10 organizations
+orders_data_to_plot_Organization <- orders_agg_Organization %>%
+  arrange(desc(prop_requests) ) %>%
+  mutate(label = case_when(row_number() <=  10 ~ Organization, 
+                           row_number() > 10 ~ 'Other')) %>%
+  group_by(label) %>%
+  summarise(prop_requests = sum(prop_requests))
+
+ggplot(orders_data_to_plot_Organization, aes(x = "", y = prop_requests, fill = label)) +
+  geom_col(color = "black") +
+  geom_text_repel(aes(x = 1.6, 
+                label = scales::percent(prop_requests, accuracy = .1)), 
+            position = position_stack(vjust = .5)) +
+  ggtitle("Proportion of request order number by organization") +
+  guides(fill = guide_legend(title = "Organization")) +
+  scale_fill_viridis_d() +
+  coord_polar(theta = "y") + 
+  theme_void() 
+
+# make a pie chart for top 10 Schools
+orders_data_to_plot_School <- orders_agg_School %>%
+  arrange(desc(prop_requests) ) %>%
+  mutate(label = case_when(row_number() <=  10 ~ School, 
+                           row_number() > 10 ~ 'Other')) %>%
+  group_by(label) %>%
+  summarise(prop_requests = sum(prop_requests))
+
+ggplot(orders_data_to_plot_School, aes(x = "", y = prop_requests, fill = label)) +
+  geom_col(color = "black") +
+  geom_text_repel(aes(x = 1.6, 
+                label = scales::percent(prop_requests, accuracy = .1)), 
+            position = position_stack(vjust = .5)) +
+  ggtitle("Proportion of request order number by school") +
+  guides(fill = guide_legend(title = "School")) +
+  scale_fill_viridis_d() +
+  coord_polar(theta = "y") + 
+  theme_void()
+
+# make a pie chart for top 5 citys
+orders_data_to_plot_City <- orders_agg_City %>%
+  arrange(desc(prop_requests) ) %>%
+  mutate(label = case_when(row_number() <=  5 ~ City, 
+                           row_number() > 5 ~ 'all other')) %>%
+  group_by(label) %>%
+  summarise(prop_requests = sum(prop_requests))
+
+ggplot(orders_data_to_plot_City, aes(x = "", y = prop_requests, fill = label)) +
+  geom_col(color = "black") +
+  geom_text_repel(aes(x = 1.6, 
+                label = scales::percent(prop_requests, accuracy = .1)), 
+            position = position_stack(vjust = .5)) +
+  ggtitle("Proportion of request order number by city") +
+  guides(fill = guide_legend(title = "City")) +
+  scale_fill_viridis_d() +
+  coord_polar(theta = "y") + 
+  theme_void()
+
+## Read in zipcode data set
+data(zip.regions)
+
+## Load NC state and wake county's zip code
+north_carolina_zip <- zip.regions$region[zip.regions$state.name == "north carolina"]
+wake_zip <- zip.regions$region[zip.regions$county.name == "wake"]
+
+## Set reference Google map API
+register_google("<your API key>")
+
+colnames(orders_agg_Zip) = c("region", "Request numbers", "value")
+orders_agg_Zip$region <- as.character(orders_agg_Zip$region)
+
+## Mapping the proportion using zipcode
+zip_choropleth(orders_agg_Zip, 
+               zip_zoom = wake_zip, 
+               num_colors = 6, 
+               reference_map = TRUE,
+               title    = "Note in pocket_Order requests map",
+               legend   = "Proportion of order request")
+```
