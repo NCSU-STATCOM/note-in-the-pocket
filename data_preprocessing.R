@@ -77,6 +77,22 @@ saveRDS(orders_allyears_df, file = "intermediary_data/orders_allyears_df.rds")
 # re-do the aggregation, this time summing up the four new columns, 
 # IGNORING the Emergency Clothing Events (and Clothing Exchanges) and the adults
 
+orders_allyears_df <- readRDS(here("intermediary_data/orders_allyears_df.rds"))
 
+orders_allyears_df <- orders_allyears_df[!(orders_allyears_df$POC %in% c("Clothing Exchange", "Emergency Clothing Events")), ]
+
+
+
+# aggregated by day by summing up any count variable
+# and taking the earliest Date Filled date
+
+orders_allyears_agg_received <- orders_allyears_df %>% 
+  group_by(`Date Received`) %>%
+  summarise(earliest_filled = min(`Date Filled`, na.rm = T), across(9:37, sum, na.rm = T)) # adjusted the indexing because grouping variable is not included within summarise
+
+# checking specific dates
+# colSums(orders_allyears_df[orders_allyears_df$`Date Received` == as.Date("2020-12-08"), 14:38])
+
+saveRDS(orders_allyears_agg_received, file = here("intermediary_data/orders_allyears_agg_received.rds"))
 
 
