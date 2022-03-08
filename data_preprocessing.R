@@ -80,7 +80,7 @@ saveRDS(orders_allyears_df, file = "intermediary_data/orders_allyears_df.rds")
 orders_allyears_df <- readRDS(here("intermediary_data/orders_allyears_df.rds"))
 
 orders_allyears_df <- orders_allyears_df[!(orders_allyears_df$POC %in% c("Clothing Exchange", "Emergency Clothing Events")), ]
-orders_allyears_df <- orders_allyears_df[orders_allyears_df$adult == 0, ]
+orders_allyears_df <- orders_allyears_df[orders_allyears_df$adult != 1 | is.na(orders_allyears_df$adult), ] # in 2019 data, NA counts as not adult
 
 
 # aggregated by day by summing up any count variable
