@@ -9,14 +9,17 @@ orders2020_df <- readRDS(here("intermediary_data/orders2020_df.rds"))
 orders2021_df <- readRDS(here("intermediary_data/orders2021_df.rds"))
 
 # Combine all data sets for 2019 up to 2021 September (ensuring all orders have been filled)
-orders_allyears_df <- rbind(orders2019_df, orders2020_df, orders2021_df[orders2021_df$`Date Received` < "2021-10-01", ])
+orders_allyears_df <- rbind(orders2019_df, orders2020_df, orders2021_df[orders2021_df$`Date Received` < as.Date("2021-10-01"), ])
 
 # Filled all the missing received date
+# Note: put this with aggregation code in data_preprocessing. Also turn Date Filled into a Date
 orders_allyears_df <- orders_allyears_df %>% 
   mutate(`Date Received` = as.Date(`Date Received`)) %>%
   complete(`Date Received` = seq.Date(min(`Date Received`), max(`Date Received`), by = "day"))
 
-# add a summary variable
+# add a summary variable 
+# Note: put this with aggregation code in data_preprocessing.
+# Note: some rows may have more than one individual. Use the four indicator variables to find true number of individuals in a row
 orders_allyears_df <- orders_allyears_df %>% 
   group_by(`Date Received`) %>%
   mutate(`Daily Requests` = n())
@@ -37,12 +40,14 @@ orders_agg_earlist_filled <- orders_allyears_NE %>%
 saveRDS(orders_agg_earlist_filled, file = here("intermediary_data/orders_agg_earlist_filled.rds"))
 
 ## aggregated by latest filled date
+# Note: put this with aggregation code in data_preprocessing
 orders_agg_lastest_filled <- orders_allyears_NE %>% 
   group_by(`Date Received`) %>%
   summarise(latest_filled = max(`Date Filled`), across(9:33, sum),`Daily Requests` = n()) 
 saveRDS(orders_agg_lastest_filled, file = here("intermediary_data/orders_agg_lastest_filled.rds"))
 
 ## mean_order_filled_date
+# Note: fix this and put this with aggregation code in data_preprocessing
 orders_mean_filled <- orders_allyears_NE %>%
   filter(!is.na(`Date Filled`)) %>%
   arrange(`Date Filled`) %>%
@@ -62,13 +67,22 @@ orders_agg_datediff <- orders_allyears_NE %>%
   mutate(across(2:27, round))
 saveRDS(orders_agg_datediff, file = here("intermediary_data/orders_agg_datediff.rds"))
 
+
+
+##### Categorical Data Exploration
+
+# Note: some rows may have more than one individual. Use the four indicator variables to find true number of individuals in a row
+# use the updated orders_allyears_df.rds, summarise by sum(female_small + male_small + female_large + male_large)
+# Also, remove Emergency, Clothing Exchange, and adults.
+
 # Following aggregation using the full data set
+
 ## aggregated by POC
 orders_agg_POC <- orders_allyears_df %>% 
   group_by(`POC`) %>%
   summarise(`Served individuals` = n())
 
-## aggregated by Organization
+## aggregated by Organization. prop_requests is proportion of rows in dataset corresponding to that organization
 orders_agg_Organization <- orders_allyears_df %>%
   mutate(Organization = ifelse(Organization == "Boys & Girls Club, & Other organizations where we host Clothing Exchanges",
                              "Boys & Girls Club & Others_Clothing Exchanges", Organization)) %>%

@@ -1,6 +1,6 @@
 
 # Data pre-processing
-# by Alvin Sheng
+# by Alvin Sheng and Yinqiao Wang
 
 #####
 
@@ -37,8 +37,6 @@ saveRDS(orders_allyears_agg_received, file = here("intermediary_data/orders_ally
 #####
 
 # Data pre-processing after 2/25 meeting with Note in the Pocket: 
-# instead of tracking the clothing count, track the number of girls/boys/men/women served
-# Also, omit the Emergency Clothing Events
 
 # checking that each row in fact only corresponds to one person
 
@@ -46,6 +44,15 @@ orders2019_df <- readRDS("intermediary_data/orders2019_df.rds")
 orders2020_df <- readRDS("intermediary_data/orders2020_df.rds")
 orders2021_df <- readRDS("intermediary_data/orders2021_df.rds")
 orders_df = rbind(orders2019_df, orders2020_df, orders2021_df[orders2021_df$`Date Received` < as.Date("2021-10-01"), ])
+
+# Zero padding of all the received dates
+# Note: for the above time range, there are 990 unique days
+orders_df <- orders_df %>% 
+  mutate(`Date Received` = as.Date(`Date Received`)) %>%
+  mutate(`Date Filled` = as.Date(`Date Filled`)) %>%
+  complete(`Date Received` = seq.Date(min(`Date Received`), max(`Date Received`), by = "day"))
+
+# instead of tracking the clothing count, track the number of girls/boys/men/women served
 
 girl_clothes <- c("gt", "gb", "gu", "gs", "gc")
 boy_clothes <- c("bt", "bb", "bu", "bs", "bc")
@@ -63,8 +70,6 @@ table(num_persons)
 
 
 # add four indicator columns: female_small (girl), male_small (boy), female_large (woman), male_large (man)
-# to orders2020_df.rds (non-aggregated versions)
-
 orders_allyears_df <- orders_df %>% mutate(female_small = (rowSums(orders_df[girl_clothes], na.rm = T) != 0), 
                                            male_small = (rowSums(orders_df[boy_clothes], na.rm = T) != 0), 
                                            female_large = (rowSums(orders_df[woman_clothes], na.rm = T) != 0), 
@@ -74,7 +79,7 @@ saveRDS(orders_allyears_df, file = "intermediary_data/orders_allyears_df.rds")
 
 
 
-# re-do the aggregation, this time summing up the four new columns, 
+# do the aggregation, this time summing up the four new columns, 
 # IGNORING the Emergency Clothing Events (and Clothing Exchanges) and the adults
 
 orders_allyears_df <- readRDS(here("intermediary_data/orders_allyears_df.rds"))
@@ -82,13 +87,32 @@ orders_allyears_df <- readRDS(here("intermediary_data/orders_allyears_df.rds"))
 orders_allyears_df <- orders_allyears_df[!(orders_allyears_df$POC %in% c("Clothing Exchange", "Emergency Clothing Events")), ]
 orders_allyears_df <- orders_allyears_df[orders_allyears_df$adult != 1 | is.na(orders_allyears_df$adult), ] # in 2019 data, NA counts as not adult
 
+# re-doing the zero-padding, in case the the above code removed some days
+orders_allyears_df <- orders_allyears_df %>% 
+  complete(`Date Received` = seq.Date(min(`Date Received`), max(`Date Received`), by = "day"))
+
+# re-creating the four indicator columns, for the zero-padded rows
+orders_allyears_df <- orders_allyears_df %>% mutate(female_small = (rowSums(orders_allyears_df[girl_clothes], na.rm = T) != 0), 
+                                           male_small = (rowSums(orders_allyears_df[boy_clothes], na.rm = T) != 0), 
+                                           female_large = (rowSums(orders_allyears_df[woman_clothes], na.rm = T) != 0), 
+                                           male_large = (rowSums(orders_allyears_df[man_clothes], na.rm = T) != 0))
+
+# # add count of individuals served
+# # some rows may have more than one individual (or none). Use the four indicator variables to find true number of individuals in a row
+# orders_allyears_df <- orders_allyears_df %>% 
+#   group_by(`Date Received`) %>%
+#   mutate(`Daily Requests` = n())
 
 # aggregated by day by summing up any count variable
 # and taking the earliest Date Filled date
-
 orders_allyears_agg_received <- orders_allyears_df %>% 
   group_by(`Date Received`) %>%
-  summarise(earliest_filled = min(`Date Filled`, na.rm = T), across(9:37, sum, na.rm = T)) # adjusted the indexing because grouping variable is not included within summarise
+  summarise(earliest_filled = min(`Date Filled`, na.rm = T), 
+            latest_filled = max(`Date Filled`, na.rm = T),
+            mean_filled = mean(`Date Filled`, na.rm = T),
+            mean_lag = mean(`Date Filled` - `Date Received`, na.rm = T),
+            num_requests = sum(female_small + male_small + female_large + male_large),
+            across(9:37, sum, na.rm = T)) # adjusted the indexing because grouping variable is not included within summarise
 
 # checking specific dates
 # colSums(orders_allyears_df[orders_allyears_df$`Date Received` == as.Date("2020-12-08"), 14:38])
