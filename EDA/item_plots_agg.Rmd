@@ -1,0 +1,109 @@
+---
+title: "item_plots_agg"
+author: "Hyoshin Kim"
+date: '2022 3 10 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggpubr)
+```
+
+### Read in cleaned, aggregated data
+
+```{r}
+setwd("D:/GitHub/note-in-the-pocket")
+orders_agg_df <- readRDS("intermediary_data/orders_allyears_agg_received.rds")
+```
+
+```{r}
+### Rename `Date Received`
+orders_agg_df <- orders_agg_df %>%
+  rename(date_received = `Date Received`)
+orders_agg_df$date_received <- lubridate::as_date(orders_agg_df$date_received)
+```
+
+### Months with the most requests received, requests filled.
+
+```{r}
+# Table_df <- orders_agg_df %>% drop_na()
+# recv_date <- lubridate::as_date(Table_df$date_received)
+# fill_date <- lubridate::as_date(Table_df$earliest_filled)
+# Table_recv <- table(lubridate::month(recv_date)) %>% 
+#   data.frame() %>% 
+#   rename(recv_date = Var1) %>%
+#   arrange(desc(Freq)) 
+# Table_fill <- table(lubridate::month(fill_date)) %>% 
+#   data.frame() %>% 
+#   rename(fill_date = Var1) %>%
+#   arrange(desc(Freq)) 
+```
+
+```{r}
+# ggplot() +
+#   geom_point(aes(recv_date, Freq, color = "red"), data = Table_recv) +
+#   geom_point(aes(fill_date, Freq, color = "blue"), data = Table_fill) +
+#   scale_color_manual(labels = c("Earliest Filled", "Received"), values = c("blue", "red"))
+```
+
+
+### Plot of items by date
+
+```{r}
+items_List <- c("num_requests","Acc",
+                "gt", "gb", "gu", "gs", "gc",
+                "bt", "bb", "bu", "bs", "bc",
+                "wt", "wb", "wu", "ws", "wc",
+                "mt", "mb", "mu", "ms", "mc",
+                "female_small", "female_large",
+                "male_small", "male_large")
+
+for (item in items_List) {
+  plot_item <- str_c(item, "_plot")
+  assign(plot_item, 
+         ggplot(data = orders_agg_df) +
+           geom_point(aes_string(x = "date_received", y = item)))
+}
+```
+
+```{r}
+pAcc <- ggarrange(num_requests_plot,Acc_plot)
+pg <- ggarrange(gt_plot,
+          gb_plot,
+          gu_plot,
+          gs_plot,
+          gc_plot)
+pb <- ggarrange(bt_plot,
+                bb_plot,
+                bu_plot,
+                bs_plot,
+                bc_plot)
+pw <- ggarrange(wt_plot,
+                wb_plot,
+                wu_plot,
+                ws_plot,
+                wc_plot)
+pm <- ggarrange(mt_plot,
+                mb_plot,
+                mu_plot,
+                ms_plot,
+                mc_plot)
+pw_size <- ggarrange(female_small_plot, female_large_plot)
+pm_size <- ggarrange(male_small_plot, male_large_plot)
+
+```
+
+```{r}
+pAcc
+pg
+pb
+pw
+pm
+pw_size
+pm_size
+```
+
+
+
