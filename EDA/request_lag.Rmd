@@ -1,9 +1,23 @@
+# Request Lag Plots
+
+Understanding the trends in the __lag time__ is the first step towards improving order turnaround speed.
+The lag time is the number of days between an order being received and fulfilled.
+For example, if an order was received on March 2 and fulfilled on March 10, the lag time would be 8 days.
+To get view of how the lag time has changed over time, we plot lag time on the y-axis against the date the orders were received on the x-axis.
+If an order was received on March 2 2020 and filled on March 10 2020 that point would show up at March 2 2020 on the x-axis with a y-value of 8.
+We also stratified by gender to get a sense of if the lag time distributions was different for males and females.
+Because points can over lap, e.x. two orders were received on March 2 and both were filled in 8 days, we also adjusted the transparency of the points.
+A darker point means that there are actually many orders stacked at the same value.
+The vertical line at March 15, 2020 is to give a general date for when COVID may have started to affect operations.
+
+
+```{r, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 library(ggplot2)
 library(dplyr)
 library(lubridate)
-orders2019_df <- readRDS("intermediary_data/orders2019_df.rds")
-orders2020_df <- readRDS("intermediary_data/orders2020_df.rds")
-orders2021_df <- readRDS("intermediary_data/orders2021_df.rds")
+orders2019_df <- readRDS("../intermediary_data/orders2019_df.rds")
+orders2020_df <- readRDS("../intermediary_data/orders2020_df.rds")
+orders2021_df <- readRDS("../intermediary_data/orders2021_df.rds")
 orders_df = rbind(orders2019_df, orders2020_df, orders2021_df)
 
 
@@ -21,7 +35,7 @@ plot_df = data.frame(recv_date, recv_date_y, recv_date_md, date_diff, female)
 
 ggplot(plot_df, aes(x = recv_date, y = date_diff, color)) +
   geom_point(size=2, aes(color = female), alpha = 0.5) +
-  ylab("Date differential") +
+  ylab("Lag Time") +
   xlab("Date Received") + 
   ggtitle("Request fulfillment lag time")  + 
   geom_vline(xintercept = as.Date("2020-03-15")) +
@@ -29,13 +43,19 @@ ggplot(plot_df, aes(x = recv_date, y = date_diff, color)) +
   theme(axis.text.x = element_text(face = "bold", color = "#993333", 
                                    size = 12, angle = 90)) +
   scale_color_manual(values = c("TRUE" = "blue", "FALSE" = "red"))
+```
 
 
 
+Next we filter out any orders that take less than 5 days to fulfill.
+This helps remove emergency orders that needed immediate attention and focus on more standard orders.
+
+
+```{r, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 plot_df2 = plot_df %>% filter(date_diff >= 5)
 ggplot(plot_df2, aes(x = recv_date, y = date_diff, color)) +
   geom_point(size=2, aes(color = female), alpha = 0.5) +
-  ylab("Date differential") +
+  ylab(" Lag Time") +
   xlab("Date Received") + 
   ggtitle("Request fulfillment lag time > 5 days")  + 
   geom_vline(xintercept = as.Date("2020-03-15")) +
@@ -43,34 +63,50 @@ ggplot(plot_df2, aes(x = recv_date, y = date_diff, color)) +
   theme(axis.text.x = element_text(face = "bold", color = "#993333", 
                                    size = 12, angle = 90)) +
   scale_color_manual(values = c("TRUE" = "blue", "FALSE" = "red"))
+```
 
-plot_df3 = plot_df %>% filter(female)
+To reduce clutter, we also plot the requests for each gender separately.
+```{r, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+plot_df3 = plot_df %>% filter(female)%>% filter(date_diff >= 5)
 ggplot(plot_df3, aes(x = recv_date, y = date_diff, color)) +
   geom_point(size=2, alpha = 0.5, color = "red") +
-  ylab("Date differential") +
+  ylab(" Lag Time") +
   xlab("Date Received") + 
   ggtitle("Request fulfillment for females")  + 
   geom_vline(xintercept = as.Date("2020-03-15")) +
   scale_x_date(date_breaks="1 month", date_labels="%B-%Y")  + 
   theme(axis.text.x = element_text(face = "bold", color = "#993333", 
                                    size = 12, angle = 90))
+```
 
-plot_df4 = plot_df %>% filter(!female)
+
+```{r, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+plot_df4 = plot_df %>% filter(!female)%>% filter(date_diff >= 5)
 ggplot(plot_df4, aes(x = recv_date, y = date_diff, color)) +
   geom_point(size=2, alpha = 0.5, color = "blue") +
-  ylab("Date differential") +
+  ylab(" Lag Time") +
   xlab("Date Received") + 
   ggtitle("Request fulfillment for males")  + 
   geom_vline(xintercept = as.Date("2020-03-15")) +
   scale_x_date(date_breaks="1 month", date_labels="%B-%Y")  + 
   theme(axis.text.x = element_text(face = "bold", color = "#993333", 
                                    size = 12, angle = 90))
+```
+
+The request distributions look similar for both males and females.
+There is a clear spike in request fulfillment time around the onset of COVID, when Note in the Pocket had to temporarily close and volunteering was not allowed
 
 
+Finally, we stack all of the data up by month.
+This more easily visualizes trends that occur throughout a year.
+```{r, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 # stack everything on year
-ggplot(plot_df, aes(x = recv_date_md, y = date_diff, color)) +
+plot_df5 = plot_df %>% filter(date_diff >= 5)
+plot_df5$recv_date_y = factor(plot_df5$recv_date_y)
+
+ggplot(plot_df5, aes(x = recv_date_md, y = date_diff, color)) +
   geom_point(size=2, aes(color = recv_date_y), alpha = 0.25) +
-  ylab("Date differential") +
+  ylab(" Lag Time") +
   xlab("Date Received") + 
   ggtitle("Request fulfillment lag time stacked monthly")  + 
   scale_x_date(date_breaks="1 month", date_labels="%B")  +
@@ -78,5 +114,8 @@ ggplot(plot_df, aes(x = recv_date_md, y = date_diff, color)) +
                                    size = 12, angle = 90)) + 
   geom_smooth() + 
   scale_color_manual(values = c("2019" = "blue", "2020" = "red", "2021" = "orange"))
+```
 
 
+As expected, the summer months have fewer request and also less lag with requests ramping back up at the beginning of the academic year.
+We can clearly see the effect of the onset of COVID at the beginning of 2020 compared to the rest of the years.
