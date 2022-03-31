@@ -97,8 +97,6 @@ for (item in items_List) {
            ggtitle(str_to_title(title)) +
            geom_smooth(method = "loess"))
 }
-
-
 ```
 
 ```{r, message = FALSE}
@@ -122,7 +120,21 @@ male_large_plot
 ```
 
 
-### Plot of Student and Non-Student
+### Plot of Total Number of Requests and Student Status
 
+```{r}
+status_df <- orders_agg_df %>%
+  dplyr::select(date_received, num_requests, student, NonStudent)
+status_df_long <- gather(status_df, status, num, 
+                         num_requests, student, NonStudent)
+
+ggplot(data = status_df_long,
+                aes(x = date_received, y = num, colour = status)) +
+           theme_bw() +
+           geom_point() +
+           xlab("date received") +
+           ylab("number of requests") +
+           ggtitle("Total Number of Requests and Student Status")
+```
 
 
