@@ -92,6 +92,7 @@ for (item in items_List) {
                 aes_string(x = "date_received", y = item)) +
            theme_bw() +
            geom_point() +
+           geom_line() +
            xlab("date received") +
            ylab("number of requests") +
            ggtitle(str_to_title(title)) +
@@ -120,6 +121,10 @@ male_large_plot
 ```
 
 
+- Based on the time plots for each clothing item (female small, male small, female large, male large), there is a recurring pattern each year. A small peak in spring, and a larger peak in fall, presumably reflecting the start of school semester. 
+
+- The small peak in spring is less apparent in 2020 for all clothing items, because of COVID starting around that time of year. 
+
 ### Plot of Total Number of Requests and Student Status
 
 ```{r}
@@ -132,9 +137,10 @@ ggplot(data = status_df_long,
                 aes(x = date_received, y = num, colour = status)) +
            theme_bw() +
            geom_point() +
+           geom_line() +
            xlab("date received") +
            ylab("number of requests") +
            ggtitle("Total Number of Requests and Student Status")
 ```
-
+### Plot of 
 
