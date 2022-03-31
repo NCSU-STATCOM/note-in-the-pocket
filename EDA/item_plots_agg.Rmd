@@ -51,59 +51,96 @@ orders_agg_df$date_received <- lubridate::as_date(orders_agg_df$date_received)
 
 ### Plot of items by date
 
+```{r, echo=FALSE, eval = FALSE}
+#"Acc",
+#"gt", "gb", "gu", "gs", "gc",
+#"bt", "bb", "bu", "bs", "bc",
+#"wt", "wb", "wu", "ws", "wc",
+#"mt", "mb", "mu", "ms", "mc",
+# pg <- ggarrange(gt_plot,
+#           gb_plot,
+#           gu_plot,
+#           gs_plot,
+#           gc_plot)
+# pb <- ggarrange(bt_plot,
+#                 bb_plot,
+#                 bu_plot,
+#                 bs_plot,
+#                 bc_plot)
+# pw <- ggarrange(wt_plot,
+#                 wb_plot,
+#                 wu_plot,
+#                 ws_plot,
+#                 wc_plot)
+# pm <- ggarrange(mt_plot,
+#                 mb_plot,
+#                 mu_plot,
+#                 ms_plot,
+#                 mc_plot)
+```
+
 ```{r}
-items_List <- c("num_requests","Acc",
-                "gt", "gb", "gu", "gs", "gc",
-                "bt", "bb", "bu", "bs", "bc",
-                "wt", "wb", "wu", "ws", "wc",
-                "mt", "mb", "mu", "ms", "mc",
+items_List <- c("num_requests",
                 "female_small", "female_large",
                 "male_small", "male_large")
 
 for (item in items_List) {
   plot_item <- str_c(item, "_plot")
+  title <- str_replace(item, "_", " ")
   assign(plot_item, 
-         ggplot(data = orders_agg_df) +
-           geom_point(aes_string(x = "date_received", y = item)))
+         ggplot(data = orders_agg_df,
+                aes_string(x = "date_received", y = item)) +
+           theme_bw() +
+           geom_point() +
+           geom_line() +
+           xlab("date received") +
+           ylab("number of requests") +
+           ggtitle(str_to_title(title)) +
+           geom_smooth(method = "loess"))
 }
 ```
 
-```{r}
-pAcc <- ggarrange(num_requests_plot,Acc_plot)
-pg <- ggarrange(gt_plot,
-          gb_plot,
-          gu_plot,
-          gs_plot,
-          gc_plot)
-pb <- ggarrange(bt_plot,
-                bb_plot,
-                bu_plot,
-                bs_plot,
-                bc_plot)
-pw <- ggarrange(wt_plot,
-                wb_plot,
-                wu_plot,
-                ws_plot,
-                wc_plot)
-pm <- ggarrange(mt_plot,
-                mb_plot,
-                mu_plot,
-                ms_plot,
-                mc_plot)
-pw_size <- ggarrange(female_small_plot, female_large_plot)
-pm_size <- ggarrange(male_small_plot, male_large_plot)
-
+```{r, message = FALSE}
+num_requests_plot
 ```
 
-```{r}
-pAcc
-pg
-pb
-pw
-pm
-pw_size
-pm_size
+```{r, message = FALSE}
+female_small_plot
+```
+
+```{r, message = FALSE}
+male_small_plot
+```
+
+```{r, message = FALSE}
+female_large_plot
+```
+
+```{r, message = FALSE}
+male_large_plot
 ```
 
 
+- Based on the time plots for each clothing item (female small, male small, female large, male large), there is a recurring pattern each year. A small peak in spring, and a larger peak in fall, presumably reflecting the start of school semester. 
+
+- The small peak in spring is less apparent in 2020 for all clothing items, because of COVID starting around that time of year. 
+
+### Plot of Total Number of Requests and Student Status
+
+```{r}
+status_df <- orders_agg_df %>%
+  dplyr::select(date_received, num_requests, student, NonStudent)
+status_df_long <- gather(status_df, status, num, 
+                         num_requests, student, NonStudent)
+
+ggplot(data = status_df_long,
+                aes(x = date_received, y = num, colour = status)) +
+           theme_bw() +
+           geom_point() +
+           geom_line() +
+           xlab("date received") +
+           ylab("number of requests") +
+           ggtitle("Total Number of Requests and Student Status")
+```
+### Plot of 
 
