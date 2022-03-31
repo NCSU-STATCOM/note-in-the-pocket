@@ -1,0 +1,184 @@
+---
+title: "EDA for Character Variables--By Size and Gender"
+author: "Jake Koerner"
+output: pdf_document
+---
+
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+library(ggplot2)
+library(tidyverse)
+
+#Change as need be
+orddf <- readRDS("~/STATCOM/NoteInThePocket/orders_allyears_df.rds")
+```
+
+\textbf{Proportion of Orders for Gender, Size by POC:}
+
+```{r echo=FALSE, warning=FALSE}
+poc_dem<-orddf%>%group_by(POC)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+poc_dem<-poc_dem%>%arrange(desc(rowSums(subset(poc_dem,select=-c(POC)))))
+
+poc_dem[1:10,]%>%gather(key,val,-POC)%>%ggplot(aes(POC,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("POC")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size by POC")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_y_continuous(breaks=seq(0,700,by=50))+ guides(fill = guide_legend(reverse=T))
+```
+
+\newpage
+
+\textbf{Proportion of Orders for Gender, Size by School:}
+
+```{r echo=FALSE, warning=FALSE}
+school_dem<-orddf%>%group_by(School)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+school_dem<-na.omit(school_dem)%>%arrange(desc(rowSums(subset(na.omit(school_dem),select=-c(School)))))
+
+school_dem[1:10,]%>%gather(key,val,-School)%>%ggplot(aes(School,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("School")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size by School")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_y_continuous(breaks=seq(0,450,by=50))+ guides(fill = guide_legend(reverse=T))
+```
+
+\newpage
+
+\textbf{Proportion of Orders for Gender, Size by Organization:}
+
+```{r echo=FALSE, warning=FALSE}
+org_dem<-orddf%>%group_by(Organization)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+org_dem<-na.omit(org_dem)%>%arrange(desc(rowSums(subset(na.omit(org_dem),select=-c(Organization)))))
+
+org_dem$Organization<-substr(org_dem$Organization,1,5)
+
+org_dem[1:10,]%>%gather(key,val,-Organization)%>%ggplot(aes(Organization,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("Organization")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size by Organization")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_y_continuous(breaks=seq(0,2500,by=500))+ guides(fill = guide_legend(reverse=T))
+```
+
+\newpage
+
+\textbf{Proportion of Orders for Gender, Size by ZipCode:}
+
+```{r echo=FALSE, warning=FALSE}
+zip_dem<-orddf%>%group_by(Zip)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+zip_dem<-na.omit(zip_dem)%>%arrange(desc(rowSums(subset(na.omit(zip_dem),select=-c(Zip)))))
+zip_dem$Zip<-as.character(zip_dem$Zip)
+
+zip_dem[1:10,]%>%gather(key,val,-Zip)%>%ggplot(aes(Zip,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("ZipCode")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size for ZipCode")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_y_continuous(breaks=seq(0,700,by=50))+ guides(fill = guide_legend(reverse=T))
+```
+
+\newpage
+
+\textbf{Proportion of Orders for Gender, Size by Adult v Non-Adult:}
+
+```{r echo=FALSE, warning=FALSE}
+ad_dem<-orddf%>%group_by(adult)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+ad_dem<-na.omit(ad_dem)%>%arrange(desc(rowSums(subset(na.omit(ad_dem),select=-c(adult)))))
+ad_dem$adult<-as.character(ad_dem$adult)
+
+ad_dem%>%gather(key,val,-adult)%>%ggplot(aes(adult,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("Adult(1) v Non-Adult(0)")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size for Adult v Non-Adult")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_y_continuous(breaks=seq(0,4500,by=500))+ guides(fill = guide_legend(reverse=T))
+```
+
+\newpage
+
+\textbf{Proportion of Orders for Gender, Size by Student v Non-Student:}
+
+```{r echo=FALSE, warning=FALSE}
+orddf["StudentInd"]<-rep(NA,nrow(orddf))
+for (i in 1:nrow(orddf)){
+  if (is.na(orddf$student[i])| is.na(orddf$NonStudent[i])){
+    if (is.na(orddf$student[i]) & is.na(orddf$NonStudent[i])){
+      orddf$StudentInd[i]<-NA
+    }
+    else if (is.na(orddf$student[i])){
+      orddf$StudentInd[i]<-orddf$NonStudent[i]
+    }
+    else{
+      orddf$StudentInd[i]<-orddf$student[i]
+    }
+  }
+  else{
+    if ((orddf$student[i]==1 & orddf$NonStudent[i]==1)| 
+        (orddf$student[i]==1 & orddf$NonStudent[i]==1)){
+      orddf$StudentInd[i]<-NA
+    }
+    else if (orddf$student[i]==1|orddf$NonStudent[i]==0){
+      orddf$StudentInd[i]<-1
+    }
+    else if (orddf$student[i]==0|orddf$NonStudent[i]==1){
+      orddf$StudentInd[i]<-0
+    }
+    else{
+      orddf$StudentInd[i]<-NA
+    }
+  }
+}
+
+stu_dem<-orddf%>%group_by(StudentInd)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+stu_dem<-na.omit(stu_dem)%>%arrange(desc(rowSums(subset(na.omit(stu_dem),select=-c(StudentInd)))))
+stu_dem$StudentInd<-as.character(stu_dem$StudentInd)
+
+stu_dem%>%gather(key,val,-StudentInd)%>%ggplot(aes(StudentInd,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("Student(1) v Non-Student(0)")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size for Student v Non-Student")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_y_continuous(breaks=seq(0,4000,by=500))+ guides(fill = guide_legend(reverse=T))
+```
