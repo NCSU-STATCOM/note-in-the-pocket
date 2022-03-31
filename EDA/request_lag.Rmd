@@ -15,9 +15,10 @@ The vertical line at March 15, 2020 is to give a general date for when COVID may
 library(ggplot2)
 library(dplyr)
 library(lubridate)
-orders2019_df <- readRDS("../intermediary_data/orders2019_df.rds")
-orders2020_df <- readRDS("../intermediary_data/orders2020_df.rds")
-orders2021_df <- readRDS("../intermediary_data/orders2021_df.rds")
+library(here)
+orders2019_df <- readRDS(here("intermediary_data/orders2019_df.rds"))
+orders2020_df <- readRDS(here("intermediary_data/orders2020_df.rds"))
+orders2021_df <- readRDS(here("intermediary_data/orders2021_df.rds"))
 orders_df = rbind(orders2019_df, orders2020_df, orders2021_df)
 
 
