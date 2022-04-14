@@ -5,7 +5,7 @@ library(here)
 
 # Data Wrangling of inventory stock details
 
-inventory_file_names <- list.files("inventory_stock_details")
+inventory_file_names <- list.files(here("inventory/"))
 
 # The first week of January is an outlier, as the current inventory was 
 # listed as quantity_in as Zoho was being set up
@@ -17,8 +17,8 @@ weekly_inventory_list <- vector("list", length = length(inventory_file_names))
 
 for (i in 1:length(inventory_file_names)) {
   
-  weekly_inventory_list[[i]] <- read.csv(paste0("inventory_stock_details/", 
-                                                inventory_file_names[i]))
+  weekly_inventory_list[[i]] <- read.csv(here(paste0("inventory/", 
+                                                inventory_file_names[i])))
   
 }
 
