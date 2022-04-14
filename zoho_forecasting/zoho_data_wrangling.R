@@ -82,7 +82,7 @@ mean_donate[clothing_names == "BOY-TOP-10"]
 # after running the WarpDLM in 
 # "warpDLM-reproducible-code-main/Code/application_analysis_local_job.R":
 
-load("warpDLM-reproducible-code-main/note_in_the_pocket_results/boys_tops10_np.RData")
+load(here("zoho_forecasting/boys_tops10_np.RData"))
 
 post_median_counts <- apply(boys_tops10_np$post_pred, c(2, 3), median)
 
