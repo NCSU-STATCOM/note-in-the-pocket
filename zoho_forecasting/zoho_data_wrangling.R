@@ -86,12 +86,23 @@ load(here("zoho_forecasting/boys_tops10_np.RData"))
 
 post_median_counts <- apply(boys_tops10_np$post_pred, c(2, 3), median)
 
-matplot(dat, type = "l", col = 1)
+post_quantile2.5_counts <- apply(boys_tops10_np$post_pred, c(2, 3), function(vec) quantile(vec, c(.025)))
+post_quantile97.5_counts <- apply(boys_tops10_np$post_pred, c(2, 3), function(vec) quantile(vec, c(.975)))
 
-matplot(post_median_counts, type = "l", col = 2, add = T)
+matplot(dat, type = "l", col = 1, lwd = 2, ylim = c(-5, 150), 
+        xlab = "Weeks Since Jan 9", ylab = "Count", 
+        main = "Observed and warpDLM Forecasted Counts, BOY-TOP-10")
+
+abline(h = 0, col = 2)
+
+matplot(post_median_counts, type = "l", col = 3, add = T, lwd = 2)
+
+matplot(post_quantile2.5_counts, type = "l", col = 3, add = T, lwd = 1)
+
+matplot(post_quantile97.5_counts, type = "l", col = 3, add = T, lwd = 1)
 
 legend("topleft", legend = c("Observed Donated", "Observed Distributed", 
-                             "warpDLM Donated", "warpDLM Distributed"), 
-       col = c(1, 1, 2, 2), lty = c(1, 2, 1, 2))
+                             "warpDLM Donated", "warpDLM Distributed", "Corresponding 95% Credible Intervals"), 
+       col = c(1, 1, 3, 3, 3), lty = c(1, 2, 1, 2, 1), lwd = c(2, 2, 2, 2, 1))
 
 
