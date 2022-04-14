@@ -1,0 +1,48 @@
+---
+title: "Inventory Model"
+author: "Naomi Giertych"
+date: "4/14/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Toy Model
+
+```{r}
+# Randomly generate weekly data
+w = 52
+y = 3
+
+January <- 1:4
+August <- (4*7 + 1):(4*8)
+
+alpha = 1
+beta = 2
+
+x_all <- c()
+y_all <- c()
+
+for(i in 1:(w*y)){
+  
+  t = i %% 52
+  if(t ==0){
+    t = 52
+  }
+  
+  gamma_A <- rnorm(n = 1, mean = 3, sd = 0.2)
+  gamma_J <- rnorm(n = 1, mean = 2, sd = 0.2)
+  x_t <- rnorm(n = 1, mean = 1, sd = 0.1)
+  y_t <- alpha + beta * x_t + gamma_J * (t %in% January) + gamma_A  *(t %in% August) + 
+          rnorm(n = 1, mean = 0, sd = 0.1)
+  
+  x_all <- append(x_all, x_t)
+  y_all <- append(y_all, y_t)
+}
+
+t <- 1:(w*y)
+Z <- cbind(rep(1, w*y), x_all, t %in% January, t %in% August)
+
+````
