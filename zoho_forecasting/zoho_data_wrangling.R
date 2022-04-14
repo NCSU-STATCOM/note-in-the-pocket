@@ -47,7 +47,7 @@ mean_distr <- apply(weekly_count_array[, 3, ], 1, mean)
 summary(mean_distr)
 quantile(mean_distr, c(.75, .90, .95, .99))
 
-# which clothing items were at or above 99th percentile of donation counts (on average)
+# which clothing items were at or above 99th percentile of distributed counts (on average)
 clothing_names[which(mean_distr >= 40.91333)]
 mean_distr[clothing_names == "BOY-TOP-10"]
 
