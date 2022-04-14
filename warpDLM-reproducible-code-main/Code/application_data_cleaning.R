@@ -3,6 +3,8 @@ library(magrittr)
 library(lubridate)
 library(tidyverse)
 
+setwd("warpDLM-reproducible-code-main/")
+
 #Import datasets
 full_df <- read_csv("./Data/Cincinnati_Fire_Incidents.zip")
 incidentTypes <- unique(full_df$INCIDENT_TYPE_ID)

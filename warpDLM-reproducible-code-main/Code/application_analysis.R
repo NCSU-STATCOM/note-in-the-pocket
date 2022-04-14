@@ -1,4 +1,7 @@
 library(dlm)
+# # to install github package rSTAR
+# library(devtools)
+# install_github("drkowal/rSTAR")
 library(rSTAR)
 library(tidyverse)
 library(mc2d)
