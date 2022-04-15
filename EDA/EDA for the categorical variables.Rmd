@@ -4,7 +4,7 @@ author: "Yinqiao Wang"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup II, include=FALSE}
 options(knitr.graphics.auto_pdf = TRUE)
 knitr::opts_chunk$set(
   fig.height = 8,
@@ -26,7 +26,7 @@ library(zipcodeR)
 
 ```{r, echo=FALSE}
 # Read in data sets
-orders_allyears_df <- readRDS(here("intermediary_data/orders_allyears_df2.rds"))
+orders_allyears_df <- readRDS(here("intermediary_data/orders_allyears_df.rds"))
 orders_allyears_plot <- orders_allyears_df %>%
   filter(POC != 'Emergency Clothing Events' & POC != 'Clothing Exchange') %>%
   filter(adult == 0)
@@ -79,7 +79,7 @@ colnames(orders_agg_Zip) = c("region", "Request numbers", "value")
 orders_agg_Zip$region <- as.character(orders_agg_Zip$region)
 ```
 
-## Exploratory data analysis for the categorical variables
+# Exploratory data analysis for the categorical variables
 
 We selected three categorical variables to explore: Organization, School, and City. We first calculated the number of individuals served by each organization/school/city. Then, based on the total number of individuals served, we calculated the proportion of service by each organization/school/city. We can find the top 10 organizations/schools/cities that mostly collaborated with the Note-in-pocket. Meanwhile, we mapped all the zipcode information except for missing value and outside North Carolina's zipcode. Combining the information from the pie chart, it is not surprising to see the Raleigh, Cary, Garner areas are the top three cities for the proportion. More service may be provided to the individuals in the Apex area, considering the influence of distance.
 
@@ -154,7 +154,7 @@ ggplot(orders_data_to_plot_City, aes(x = "", y = prop_requests, fill = label)) +
 zip_choropleth(orders_agg_Zip, 
                zip_zoom = wake_zip, 
                num_colors = 6, 
-               reference_map = T,
+               reference_map = F,
                title    = "Note in pocket_Request order zipcode information map",
                legend   = "Proportion of served individual\nnumber by zipcode")
 ```

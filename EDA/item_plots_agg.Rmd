@@ -6,16 +6,16 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, error=FALSE, message=FALSE)
 library(tidyverse)
 library(ggpubr)
+library(here)
 ```
 
-### Read in cleaned, aggregated data
+<!-- # Read in cleaned, aggregated data -->
 
 ```{r}
-setwd("D:/GitHub/note-in-the-pocket")
-orders_agg_df <- readRDS("intermediary_data/orders_allyears_agg_received.rds")
+orders_agg_df <- readRDS(here("intermediary_data/orders_allyears_agg_received.rds"))
 ```
 
 ```{r}
@@ -25,7 +25,7 @@ orders_agg_df <- orders_agg_df %>%
 orders_agg_df$date_received <- lubridate::as_date(orders_agg_df$date_received)
 ```
 
-### Months with the most requests received, requests filled.
+<!-- # Months with the most requests received, requests filled. -->
 
 ```{r}
 # Table_df <- orders_agg_df %>% drop_na()
@@ -49,7 +49,10 @@ orders_agg_df$date_received <- lubridate::as_date(orders_agg_df$date_received)
 ```
 
 
-### Plot of items by date
+
+# Count plots for requests given to Note in the Pocket
+
+## Plot of Items by Date
 
 ```{r, echo=FALSE, eval = FALSE}
 #"Acc",
@@ -125,7 +128,7 @@ male_large_plot
 
 - The small peak in spring is less apparent in 2020 for all clothing items, because of COVID starting around that time of year. 
 
-### Plot of Total Number of Requests and Student Status
+## Plot of Total Number of Requests and Student Status
 
 ```{r}
 status_df <- orders_agg_df %>%
@@ -142,5 +145,5 @@ ggplot(data = status_df_long,
            ylab("number of requests") +
            ggtitle("Total Number of Requests and Student Status")
 ```
-### Plot of 
+<!-- # Plot of  -->
 

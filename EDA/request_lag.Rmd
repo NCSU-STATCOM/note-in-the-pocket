@@ -67,6 +67,7 @@ ggplot(plot_df2, aes(x = recv_date, y = date_diff, color)) +
 ```
 
 To reduce clutter, we also plot the requests for each gender separately.
+
 ```{r, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 plot_df3 = plot_df %>% filter(female)%>% filter(date_diff >= 5)
 ggplot(plot_df3, aes(x = recv_date, y = date_diff, color)) +
@@ -100,6 +101,7 @@ There is a clear spike in request fulfillment time around the onset of COVID, wh
 
 Finally, we stack all of the data up by month.
 This more easily visualizes trends that occur throughout a year.
+
 ```{r, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
 # stack everything on year
 plot_df5 = plot_df %>% filter(date_diff >= 5)
