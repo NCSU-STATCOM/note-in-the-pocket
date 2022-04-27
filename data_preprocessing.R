@@ -6,6 +6,8 @@
 
 library(here)
 library(tidyverse)
+library(tidyr)
+library(data.table)
 
 orders2020_df <- readRDS(here("intermediary_data/orders2020_df.rds"))
 
@@ -173,5 +175,70 @@ orders_weekly_agg_received <- orders_allyears_df %>%
 # checking specific dates
 # colSums(orders_allyears_df[orders_allyears_df$start_of_week == as.Date("2020-12-06"), 10:38], na.rm = T)
 
-saveRDS(orders_weekly_agg_received, file = here("intermediary_data/orders_allyears_agg_received.rds"))
+
+
+# Now, include some useful features based on Yinqiao's ft engineering 
+# (from Feature engineering_new indicators.r)
+
+# instead of being based on `Date Received`, the features are based on start_of_week
+
+orders_weekly_agg_received$Month <- format(as.Date(orders_weekly_agg_received$start_of_week,"%Y/%m/%d"),"%m")
+
+getSeason <- function(Dates){
+  Month <- as.numeric(format(as.Date(Dates, "%Y/%m/%d"),"%m"))
+  ifelse(Month >= 12 | Month < 03,
+         "Winter",
+         ifelse(Month >= 03 & Month < 06,
+                "Spring",
+                ifelse(Month >= 06 & Month < 09,
+                       "Summer",
+                       "Fall")))
+}
+
+orders_weekly_agg_received$Season <- getSeason(as.Date(orders_weekly_agg_received$start_of_week,"%Y/%m/%d"))
+
+# Add indicator for the pre/post Covid status
+getCovidStatus <- function(Dates){
+  date <- as.Date(Dates,"%Y/%m/%d")
+  Covid_date <- as.Date("2020/03/12", "%Y/%m/%d")
+  ifelse(date < Covid_date, FALSE, TRUE)
+}
+orders_weekly_agg_received$Post_covid <- getCovidStatus(orders_weekly_agg_received$start_of_week)
+
+# fixed Yinqiao's code a bit
+getSchoolYear <- function(Dates){
+  date <- as.Date(Dates,"%Y/%m/%d")
+  schoolyear2018_e <- as.Date("2019/06/11", "%Y/%m/%d")
+  schoolyear2019_b <- as.Date("2019/08/26", "%Y/%m/%d")
+  schoolyear2019_e <- as.Date("2020/06/12", "%Y/%m/%d")
+  schoolyear2020_b <- as.Date("2020/08/17", "%Y/%m/%d")
+  schoolyear2020_e <- as.Date("2021/06/10", "%Y/%m/%d")
+  schoolyear2021_b <- as.Date("2021/08/23", "%Y/%m/%d")
+  ifelse(date %between% c(schoolyear2018_e,schoolyear2019_b), FALSE,
+         ifelse(date %between% c(schoolyear2019_e,schoolyear2020_b), FALSE,
+                ifelse(date %between% c(schoolyear2020_e,schoolyear2021_b), FALSE, TRUE)))
+}
+orders_weekly_agg_received$School_year <- getSchoolYear(orders_weekly_agg_received$start_of_week)
+
+getFirstWeek <- function(Dates){
+  date <- as.Date(Dates,"%Y/%m/%d")
+  ifelse(date %between% c("2019/08/25", "2019/08/31"), TRUE,
+         ifelse(date %between% c("2020/01/05", "2020/01/11"), TRUE,
+                ifelse(date %between% c("2020/08/16", "2020/08/22"), TRUE,
+                       ifelse(date %between% c("2021/01/03", "2021/01/09"), TRUE,
+                              ifelse(date %between% c("2021/08/22", "2021/08/28"), TRUE, FALSE)))))
+}
+orders_weekly_agg_received$Firstweek <- getFirstWeek(orders_weekly_agg_received$start_of_week)
+
+# Check the data set
+table(orders_weekly_agg_received$Month)
+table(orders_weekly_agg_received$Season)
+table(orders_weekly_agg_received$Post_covid)
+table(orders_weekly_agg_received$School_year)
+table(orders_weekly_agg_received$Firstweek)
+
+
+
+saveRDS(orders_weekly_agg_received, file = here("intermediary_data/orders_weekly_agg_received.rds"))
+
 
