@@ -40,19 +40,19 @@ getSchoolYear <- function(Dates){
   schoolyear2020_b <- as.Date("2020/08/17", "%Y/%m/%d")
   schoolyear2020_e <- as.Date("2021/06/10", "%Y/%m/%d")
   schoolyear2021_b <- as.Date("2021/08/23", "%Y/%m/%d")
-  ifelse(date %in% c(schoolyear2018_e,schoolyear2019_b), FALSE,
-         ifelse(date %in% c(schoolyear2019_e,schoolyear2020_b), FALSE,
-                ifelse(date %in% c(schoolyear2020_e,schoolyear2021_b), FALSE, TRUE)))
+  ifelse(date %between% c(schoolyear2018_e,schoolyear2019_b), FALSE,
+         ifelse(date %between% c(schoolyear2019_e,schoolyear2020_b), FALSE,
+                ifelse(date %between% c(schoolyear2020_e,schoolyear2021_b), FALSE, TRUE)))
 }
 orders_allyears_df$School_year <- getSchoolYear(orders_allyears_df$`Date Received`)
 
 getFirstWeek <- function(Dates){
   date <- as.Date(Dates,"%Y/%m/%d")
-  ifelse(date %between% c("2019/08/26", "2019/08/30"), TRUE,
-         ifelse(date %between% c("2020/01/06", "2020/01/10"), TRUE,
-                ifelse(date %between% c("2020/08/17", "2020/08/21"), TRUE,
-                       ifelse(date %between% c("2021/01/04", "2021/01/08"), TRUE,
-                              ifelse(date %between% c("2021/08/23", "2021/08/27"), TRUE, FALSE)))))
+  ifelse(date %between% c("2019/08/25", "2019/08/31"), TRUE,
+         ifelse(date %between% c("2020/01/05", "2020/01/11"), TRUE,
+                ifelse(date %between% c("2020/08/16", "2020/08/22"), TRUE,
+                       ifelse(date %between% c("2021/01/03", "2021/01/09"), TRUE,
+                              ifelse(date %between% c("2021/08/22", "2021/08/28"), TRUE, FALSE)))))
 }
 orders_allyears_df$Firstweek <- getFirstWeek(orders_allyears_df$`Date Received`)
 
