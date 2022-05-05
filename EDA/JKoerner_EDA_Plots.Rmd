@@ -1,0 +1,115 @@
+---
+output: pdf_document
+---
+
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(ggrepel)
+library(viridis)
+library(tidyverse)
+
+#Change as need be
+dir<-"~/STATCOM/NoteInThePocket/"
+
+orddf<-read.csv(paste0(dir,"merged_CDC_NP.csv"))
+```
+
+\textbf{Proportion of Orders for Gender, Size by School:}
+
+```{r echo=FALSE, warning=FALSE}
+school_dem<-orddf%>%group_by(School)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+school_dem<-na.omit(school_dem)%>%arrange(desc(rowSums(subset(na.omit(school_dem),select=-c(School)))))
+
+school_dem[1:10,]%>%gather(key,val,-School)%>%ggplot(aes(School,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("School")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size by School")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(breaks=seq(0,0.1,by=0.01))+ guides(fill = guide_legend(reverse=T))
+```
+
+\textbf{Description:} The above graph plots the ratio of orders for a gender,size per school to the total number of orders for that gender,size over all schools.
+
+\newpage
+
+\textbf{Proportion of Orders for Gender, Size by Organization:}
+
+```{r echo=FALSE, warning=FALSE}
+org_dem<-orddf%>%group_by(Organization)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+org_dem<-na.omit(org_dem)%>%arrange(desc(rowSums(subset(na.omit(org_dem),select=-c(Organization)))))
+
+org_dem$Organization<-substr(org_dem$Organization,1,5)
+
+org_dem[1:10,]%>%gather(key,val,-Organization)%>%ggplot(aes(Organization,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("Organization")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size by Organization")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+scale_y_continuous(breaks=seq(0,0.5,by=0.05))+ guides(fill = guide_legend(reverse=T))
+```
+
+\textbf{Description:} The above graph plots the ratio of orders for a gender,size per organization to the total number of orders for that gender,size over all organizations.
+
+\newpage
+
+\textbf{Proportion of Orders for Gender, Size by ZipCode:}
+
+```{r echo=FALSE, warning=FALSE}
+zip_dem<-orddf%>%group_by(Zip)%>%
+  summarise(fem_s=length(female_small[female_small==T])/length(orddf$female_small[orddf$female_small==T]),
+            fem_l=length(female_large[female_large==T])/length(orddf$female_large[orddf$female_large==T]),
+            male_s=length(male_small[male_small==T])/length(orddf$male_small[orddf$male_small==T]),
+            male_l=length(male_large[male_large==T])/length(orddf$male_large[orddf$male_large==T]))
+
+zip_dem<-na.omit(zip_dem)%>%arrange(desc(rowSums(subset(na.omit(zip_dem),select=-c(Zip)))))
+zip_dem$Zip<-as.character(zip_dem$Zip)
+
+zip_dem[1:10,]%>%gather(key,val,-Zip)%>%ggplot(aes(Zip,val,fill=key))+
+  geom_col(position = "dodge2")+xlab("ZipCode")+ylab("Proportion of Orders per Size, Gender")+
+  ggtitle("Proportion of Orders Per Gender and Size for ZipCode")+
+  scale_fill_discrete(name = "Key", labels = c("Fem Large", "Fem Small", 
+                                               "Male Large", "Male Small"))+
+  coord_flip()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  scale_y_continuous(breaks=seq(0,0.2,by=0.02))+ guides(fill = guide_legend(reverse=T))
+```
+
+\textbf{Description:} The above graph plots the ratio of orders for a gender,size per zip code to the total number of orders for that gender,size over all zip codes.
+
+\newpage
+
+\textbf{Unmet Demand by ZipCode}
+
+```{r echo=FALSE}
+ord_byZip<-orddf%>%group_by(Zip)%>%summarise(
+  total_ord=sum(female_small,na.rm = T)+sum(male_small,na.rm = T)+
+    sum(female_large,na.rm = T)+sum(male_large,na.rm = T),
+  avg_pci=mean(M_PCI)
+)
+
+ord_byZip<-ord_byZip[!is.na(ord_byZip$avg_pci),] ##METRIC FOR UNMET DEMAND
+ord_byZip["ratio"]<--1*log(ord_byZip$total_ord*ord_byZip$avg_pci^4)
+
+ggplot(ord_byZip,aes(x=total_ord, y=avg_pci, color=rank(ratio)))+geom_point()+labs(x="Total Orders by Zip",y="Mean PCI By Zip", title="Mean PCI vs Total Orders by Zip", color="Unmet Dem")+
+  scale_color_viridis() +
+  guides(size=guide_legend(override.aes = list(color = viridis(3))))+
+  geom_label_repel(aes(label=Zip),
+                   size=3, force=100, max.overlaps = 15)+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+\textbf{Description:}
+The above graph plots mean PCI for a zip code versus total orders for that zip code. Coloring is based on a metric to measure unmet demand in that zip code, i.e. where mean PCI and number of orders are both low. More yellow/large Unmet Dem indicates greater unmet demand, whereas more purple/smaller Unmet Dem indicates less demand to be met.
