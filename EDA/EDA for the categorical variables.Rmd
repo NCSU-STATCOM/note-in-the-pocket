@@ -84,24 +84,24 @@ orders_agg_Zip$region <- as.character(orders_agg_Zip$region)
 We selected three categorical variables to explore: Organization, School, and City. We first calculated the number of individuals served by each organization/school/city. Then, based on the total number of individuals served, we calculated the proportion of service by each organization/school/city. We can find the top 10 organizations/schools/cities that mostly collaborated with the Note in the Pocket. Meanwhile, we mapped all the zipcode information except for missing value and outside North Carolina's zipcode. Combining the information from the pie chart, it is not surprising to see the Raleigh, Cary, Garner areas are the top three cities for the proportion. More service may be provided to the individuals in the Apex area, considering the influence of distance.
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
-# make a pie chart for top 10 organizations
-orders_data_to_plot_Organization <- orders_agg_Organization %>%
+# make a pie chart for top 5 Cities
+orders_data_to_plot_City <- orders_agg_City %>%
   arrange(desc(prop_requests)) %>%
-  mutate(label = case_when(row_number() <=  10 ~ Organization, 
+  mutate(label = case_when(row_number() <=  10 ~ City, 
                            row_number() > 10 ~ 'Other')) %>%
   group_by(label) %>%
   summarise(prop_requests = sum(prop_requests)) %>%
   arrange(desc(prop_requests))
 
-orders_data_to_plot_Organization$label <- fct_inorder(orders_data_to_plot_Organization$label)
+orders_data_to_plot_City$label <- fct_inorder(orders_data_to_plot_City$label)
 
-ggplot(orders_data_to_plot_Organization, aes(x = "", y = prop_requests, fill = label)) +
+ggplot(orders_data_to_plot_City, aes(x = "", y = prop_requests, fill = label)) +
   geom_col(color = "black") +
   geom_text_repel(aes(x = 1.6, 
                 label = scales::percent(prop_requests, accuracy = .1)), 
             position = position_stack(vjust = .5)) +
-  ggtitle("Proportion of served individual number by organization") +
-  guides(fill = guide_legend(title = "Organization")) +
+  ggtitle("Proportion of served individual number by city") +
+  guides(fill = guide_legend(title = "City")) +
   scale_fill_viridis_d() +
   coord_polar(theta = "y") + 
   theme_void()
@@ -128,24 +128,24 @@ ggplot(orders_data_to_plot_School, aes(x = "", y = prop_requests, fill = label))
   coord_polar(theta = "y") + 
   theme_void()
 
-# make a pie chart for top 5 citys
-orders_data_to_plot_City <- orders_agg_City %>%
+# make a pie chart for top 10 organizations
+orders_data_to_plot_Organization <- orders_agg_Organization %>%
   arrange(desc(prop_requests)) %>%
-  mutate(label = case_when(row_number() <=  10 ~ City, 
+  mutate(label = case_when(row_number() <=  10 ~ Organization, 
                            row_number() > 10 ~ 'Other')) %>%
   group_by(label) %>%
   summarise(prop_requests = sum(prop_requests)) %>%
   arrange(desc(prop_requests))
 
-orders_data_to_plot_City$label <- fct_inorder(orders_data_to_plot_City$label)
+orders_data_to_plot_Organization$label <- fct_inorder(orders_data_to_plot_Organization$label)
 
-ggplot(orders_data_to_plot_City, aes(x = "", y = prop_requests, fill = label)) +
+ggplot(orders_data_to_plot_Organization, aes(x = "", y = prop_requests, fill = label)) +
   geom_col(color = "black") +
   geom_text_repel(aes(x = 1.6, 
                 label = scales::percent(prop_requests, accuracy = .1)), 
             position = position_stack(vjust = .5)) +
-  ggtitle("Proportion of served individual number by city") +
-  guides(fill = guide_legend(title = "City")) +
+  ggtitle("Proportion of served individual number by organization") +
+  guides(fill = guide_legend(title = "Organization")) +
   scale_fill_viridis_d() +
   coord_polar(theta = "y") + 
   theme_void()

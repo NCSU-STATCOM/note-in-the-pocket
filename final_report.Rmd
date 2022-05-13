@@ -8,7 +8,7 @@ output:
     toc: yes
     toc_depth: 2
 abstract: |
-  This report contains an exploratory data analysis of the requests filled by Note in the Pocket from 2019 to the present.
+  This report contains an exploratory data analysis of requests filled by Note in the Pocket from 2019 to the present. The data files analyzed are "2019 Orders Filled," "2020 Orders Filled," and "2021 Orders Filled." We examined three main themes: the trend of the number of requests over time, the lag times of fulfilling those requests, and the number of requests by categories such as School, Organization, and ZIP Code. 
 ---
 
 \newpage
