@@ -54,7 +54,7 @@ orders_agg_df$date_received <- lubridate::as_date(orders_agg_df$date_received)
 
 ## Plot of Items by Date
 
-Note that the red vertical line marks the COVID starting date, the green areas the spring semester and the brown areas the fall semester. 
+Note that the red vertical line marks the COVID starting date, the green areas the spring semester and the brown areas the fall semester. The blue curves are the fitted curves with respect to the number of requests for the female and male items. 
 
 - Based on the time plots for each clothing item (female small, male small, female large, male large), there is a recurring pattern each year. A small peak in spring, and a larger peak in fall for the number of requests, reflecting the start of the school semester. 
 
@@ -77,6 +77,34 @@ school2020_s <- lubridate::as_date(c("2021-01-04", "2021-06-10"))
 school2021 <- lubridate::as_date(c("2021-08-23", "2021-09-30"))
 ```
 
+```{r, echo = FALSE, warning=FALSE}
+### Load WarpDLM estimates.
+load("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_female_np.RData")
+load("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_male_np.RData")
+pred_female_small  <- apply(orders_female_np$post_pred[,,1], 2, median)
+pred_female_large  <- apply(orders_female_np$post_pred[,,2], 2, median)
+pred_male_small  <- apply(orders_male_np$post_pred[,,1], 2, median)
+pred_male_large  <- apply(orders_male_np$post_pred[,,2], 2, median)
+
+orders_weekly_df <- readRDS(here("intermediary_data/orders_weekly_agg_received.rds"))
+date_received <- orders_weekly_df$earliest_filled
+
+pred_female_small <- data.frame(date_received, pred_female_small)
+pred_female_large <- data.frame(date_received, pred_female_large)
+pred_male_small <- data.frame(date_received, pred_male_small)
+pred_male_large <- data.frame(date_received, pred_male_large)
+
+# Combine aggregated data with weekly predicted values.
+df <- orders_agg_df %>% 
+  dplyr::select(date_received, num_requests, 
+                female_small, female_large, male_small, male_large)
+df <- df %>% 
+  left_join(pred_female_small) %>%
+  left_join(pred_female_large) %>%
+  left_join(pred_male_small) %>%
+  left_join(pred_male_large)
+```
+
 
 ```{r}
 items_List <- c("num_requests",
@@ -88,7 +116,7 @@ for (item in items_List) {
   title <- str_replace(item, "_", " ")
   ymax <- max(orders_agg_df[item])
   assign(plot_item, 
-         ggplot(data = orders_agg_df,
+         ggplot(data = df,
                 aes_string(x = "date_received", y = item)) +
            geom_vline(xintercept = covid_date, color = "red", linetype="dotted") +
            annotate("rect", xmin = school2018_s[1], xmax = school2018_s[2],
@@ -108,8 +136,7 @@ for (item in items_List) {
            geom_line(alpha = 0.5) +
            xlab("date received") +
            ylab("number of requests") +
-           ggtitle(str_to_title(title)) +
-           geom_smooth(method = "loess"))
+           ggtitle(str_to_title(title)))
 }
 ```
 
@@ -120,28 +147,32 @@ num_requests_plot +
                     label = format(covid_date,"%m-%d"), color = "#EB5353")
 ```
 
-```{r, message = FALSE}
+```{r, message = FALSE, warning=FALSE}
 female_small_plot +
     annotate("text", x = covid_date+ 0.3, y = -1, 
-                    label = format(covid_date,"%m-%d"), color = "#EB5353")
+                    label = format(covid_date,"%m-%d"), color = "#EB5353") +
+  geom_smooth(aes(x = date_received, y = pred_female_large), color = "#0AA1DD")
 ```
 
 ```{r, message = FALSE}
 male_small_plot +
     annotate("text", x = covid_date+ 0.3, y = -1, 
-                    label = format(covid_date,"%m-%d"), color = "#EB5353")
+                    label = format(covid_date,"%m-%d"), color = "#EB5353") +
+  geom_smooth(aes(x = date_received, y = pred_male_large), color = "#0AA1DD")
 ```
 
 ```{r, message = FALSE}
 female_large_plot +
     annotate("text", x = covid_date+ 0.3, y = -1, 
-                    label = format(covid_date,"%m-%d"), color = "#EB5353")
+                    label = format(covid_date,"%m-%d"), color = "#EB5353") +
+  geom_smooth(aes(x = date_received, y = pred_female_large), color = "#0AA1DD")
 ```
 
 ```{r, message = FALSE}
 male_large_plot +
     annotate("text", x = covid_date+ 0.3, y = -1, 
-                    label = format(covid_date,"%m-%d"), color = "#EB5353")
+                    label = format(covid_date,"%m-%d"), color = "#EB5353") +
+  geom_smooth(aes(x = date_received, y = pred_male_large), color = "#0AA1DD")
 ```
 
 

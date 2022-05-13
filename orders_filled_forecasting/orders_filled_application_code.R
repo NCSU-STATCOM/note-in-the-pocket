@@ -11,6 +11,7 @@ library(bayesplot)
 library(TruncatedNormal)
 library(spatstat)  #ewcdf function
 library(mvnfast)
+library(beepr)
 
 library(here)
 setwd("D:/GitHub/note-in-the-pocket/warpDLM-reproducible-code-main")
@@ -24,12 +25,12 @@ source("Code/helper_functions.R")
 #                 male_small,
 #                 male_large)
 
-dat <- orders_allyears_agg_received %>%
+dat <- orders_weekly_agg_received %>%
   dplyr::select(female_small,
                 female_large) %>%
   as.matrix()
 
-dat_male <- orders_allyears_agg_received %>%
+dat <- orders_weekly_agg_received %>%
   dplyr::select(male_small,
                 male_large) %>%
   as.matrix()
@@ -42,11 +43,11 @@ init_mod <- dlm(FF = matrix(c(1, 0), nrow = 1) %x% diag(2), V = diag(2),
                 C0 = diag(x = 3, nrow = 4))
 
 #This can take several hours to run
-orders_female_np <- SUTSE_mcmc_dlm(dat, init_mod, update_mod = updatemod_invWish_dlm, transformation = "np",
+orders_male_np <- SUTSE_mcmc_dlm(dat, init_mod, update_mod = updatemod_invWish_dlm, transformation = "np",
                                  nsave=10000, nburn=5000, nskip=1, nfc=1, particle = T)
+beep(1)
 
-
-save(orders_female_np, file = here("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_female_np.RData"))
+save(orders_male_np, file = here("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_male_np.RData"))
 
 ###################################################################
 
