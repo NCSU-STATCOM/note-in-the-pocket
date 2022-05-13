@@ -52,9 +52,21 @@ orders_agg_df$date_received <- lubridate::as_date(orders_agg_df$date_received)
 
 # Count plots for requests given to Note in the Pocket
 
+## Clothing categories
+
+In this section and the last section, we count the number of individuals that request clothing of a given gender and size:
+
+- An individual that requests clothing labeled as gt, gb, gu, gs, gc is considered as "female small."
+
+- An individual that requests clothing labeled as bt, bb, bu, bs, bc is considered as "male small."
+
+- An individual that requests clothing labeled as wt, wb, wu, ws, wc is considered as "female large."
+
+- An individual that requests clothing labeled as mt, mb, mu, ms, mc is considered as "male large."
+
 ## Plot of Items by Date
 
-Note that the red vertical line marks the COVID starting date, the green areas the spring semester and the brown areas the fall semester. The blue curves are the fitted curves with respect to the number of requests for the female and male items. 
+Note that the red vertical line marks the COVID starting date, the green areas the spring semester and the brown areas the fall semester for Wake County public schools. The blue curves are the fitted curves with respect to the number of requests for the female and male items. 
 
 - Based on the time plots for each clothing item (female small, male small, female large, male large), there is a recurring pattern each year. A small peak in spring, and a larger peak in fall for the number of requests, reflecting the start of the school semester. 
 
@@ -66,7 +78,7 @@ Note that the red vertical line marks the COVID starting date, the green areas t
 covid_date <- lubridate::as_date("2020-03-12")
 
 # School times
-school2018_s <- lubridate::as_date(c("2019-01-15", "2019-06-11"))
+school2018_s <- lubridate::as_date(c("2019-01-03", "2019-06-11"))
 
 school2019_f <- lubridate::as_date(c("2019-08-26", "2019-12-20"))
 school2019_s <- lubridate::as_date(c("2020-01-06", "2020-06-12"))
@@ -79,8 +91,8 @@ school2021 <- lubridate::as_date(c("2021-08-23", "2021-09-30"))
 
 ```{r, echo = FALSE, warning=FALSE}
 ### Load WarpDLM estimates.
-load("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_female_np.RData")
-load("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_male_np.RData")
+load(here("orders_filled_forecasting/orders_female_np.RData"))
+load(here("orders_filled_forecasting/orders_male_np.RData"))
 pred_female_small  <- apply(orders_female_np$post_pred[,,1], 2, median)
 pred_female_large  <- apply(orders_female_np$post_pred[,,2], 2, median)
 pred_male_small  <- apply(orders_male_np$post_pred[,,1], 2, median)
