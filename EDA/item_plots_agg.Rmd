@@ -54,33 +54,29 @@ orders_agg_df$date_received <- lubridate::as_date(orders_agg_df$date_received)
 
 ## Plot of Items by Date
 
-```{r, echo=FALSE, eval = FALSE}
-#"Acc",
-#"gt", "gb", "gu", "gs", "gc",
-#"bt", "bb", "bu", "bs", "bc",
-#"wt", "wb", "wu", "ws", "wc",
-#"mt", "mb", "mu", "ms", "mc",
-# pg <- ggarrange(gt_plot,
-#           gb_plot,
-#           gu_plot,
-#           gs_plot,
-#           gc_plot)
-# pb <- ggarrange(bt_plot,
-#                 bb_plot,
-#                 bu_plot,
-#                 bs_plot,
-#                 bc_plot)
-# pw <- ggarrange(wt_plot,
-#                 wb_plot,
-#                 wu_plot,
-#                 ws_plot,
-#                 wc_plot)
-# pm <- ggarrange(mt_plot,
-#                 mb_plot,
-#                 mu_plot,
-#                 ms_plot,
-#                 mc_plot)
+Note that the red vertical line marks the COVID starting date, the green areas the spring semester and the brown areas the fall semester. 
+
+- Based on the time plots for each clothing item (female small, male small, female large, male large), there is a recurring pattern each year. A small peak in spring, and a larger peak in fall for the number of requests, reflecting the start of the school semester. 
+
+- There seems to be a smaller number of requests during the 2020 spring semester after COVID starts. 
+
+```{r, echo = FALSE}
+# Important dates to note:
+# Covid start date
+covid_date <- lubridate::as_date("2020-03-12")
+
+# School times
+school2018_s <- lubridate::as_date(c("2019-01-15", "2019-06-11"))
+
+school2019_f <- lubridate::as_date(c("2019-08-26", "2019-12-20"))
+school2019_s <- lubridate::as_date(c("2020-01-06", "2020-06-12"))
+
+school2020_f <- lubridate::as_date(c("2020-08-24", "2020-12-18"))
+school2020_s <- lubridate::as_date(c("2021-01-04", "2021-06-10"))
+
+school2021 <- lubridate::as_date(c("2021-08-23", "2021-09-30"))
 ```
+
 
 ```{r}
 items_List <- c("num_requests",
@@ -90,12 +86,26 @@ items_List <- c("num_requests",
 for (item in items_List) {
   plot_item <- str_c(item, "_plot")
   title <- str_replace(item, "_", " ")
+  ymax <- max(orders_agg_df[item])
   assign(plot_item, 
          ggplot(data = orders_agg_df,
                 aes_string(x = "date_received", y = item)) +
+           geom_vline(xintercept = covid_date, color = "red", linetype="dotted") +
+           annotate("rect", xmin = school2018_s[1], xmax = school2018_s[2],
+                    ymin = 0, ymax = ymax, alpha = .2, fill = "#36AE7C") +
+           annotate("rect", xmin = school2019_f[1], xmax = school2019_f[2],
+                    ymin = 0, ymax = ymax, alpha = .2, fill = "#CE9461") +
+           annotate("rect", xmin = school2019_s[1], xmax = school2019_s[2],
+                    ymin = 0, ymax = ymax, alpha = .2, fill = "#36AE7C") +
+           annotate("rect", xmin = school2020_f[1], xmax = school2020_f[2],
+                    ymin = 0, ymax = ymax, alpha = .2, fill = "#CE9461") +
+           annotate("rect", xmin = school2020_s[1], xmax = school2020_s[2],
+                    ymin = 0, ymax = ymax, alpha = .2, fill = "#36AE7C") +
+           annotate("rect", xmin = school2021[1], xmax = school2021[2],
+                    ymin = 0, ymax = ymax, alpha = .2, fill = "#CE9461") +
            theme_bw() +
-           geom_point() +
-           geom_line() +
+           geom_point(alpha = 0.5) +
+           geom_line(alpha = 0.5) +
            xlab("date received") +
            ylab("number of requests") +
            ggtitle(str_to_title(title)) +
@@ -104,43 +114,72 @@ for (item in items_List) {
 ```
 
 ```{r, message = FALSE}
-num_requests_plot
+num_requests_plot + 
+  ggtitle("Total number of requests") +
+  annotate("text", x = covid_date+ 0.3, y = -5, 
+                    label = format(covid_date,"%m-%d"), color = "#EB5353")
 ```
 
 ```{r, message = FALSE}
-female_small_plot
+female_small_plot +
+    annotate("text", x = covid_date+ 0.3, y = -1, 
+                    label = format(covid_date,"%m-%d"), color = "#EB5353")
 ```
 
 ```{r, message = FALSE}
-male_small_plot
+male_small_plot +
+    annotate("text", x = covid_date+ 0.3, y = -1, 
+                    label = format(covid_date,"%m-%d"), color = "#EB5353")
 ```
 
 ```{r, message = FALSE}
-female_large_plot
+female_large_plot +
+    annotate("text", x = covid_date+ 0.3, y = -1, 
+                    label = format(covid_date,"%m-%d"), color = "#EB5353")
 ```
 
 ```{r, message = FALSE}
-male_large_plot
+male_large_plot +
+    annotate("text", x = covid_date+ 0.3, y = -1, 
+                    label = format(covid_date,"%m-%d"), color = "#EB5353")
 ```
 
 
-- Based on the time plots for each clothing item (female small, male small, female large, male large), there is a recurring pattern each year. A small peak in spring, and a larger peak in fall, presumably reflecting the start of school semester. 
 
-- The small peak in spring is less apparent in 2020 for all clothing items, because of COVID starting around that time of year. 
+
 
 ## Plot of Total Number of Requests and Student Status
 
+To see if student status has an impact on the the number of requests, let us look at the plot of the total number of requests by student status. The count plots for Student and Non-student follow a similar trend as before, so we can conclude that looking at just the total number of requests will be sufficient. 
+
 ```{r}
 status_df <- orders_agg_df %>%
-  dplyr::select(date_received, num_requests, student, NonStudent)
+  dplyr::select(date_received, num_requests, student, NonStudent) %>%
+  rename(`Number of Requests` = num_requests,
+         Student = student)
 status_df_long <- gather(status_df, status, num, 
-                         num_requests, student, NonStudent)
-
+                         `Number of Requests`, Student, NonStudent)
+ymax <- max(status_df$`Number of Requests`)
 ggplot(data = status_df_long,
-                aes(x = date_received, y = num, colour = status)) +
+           aes(x = date_received, y = num, colour = status)) +
+           geom_vline(xintercept = covid_date, color = "red", linetype="dotted") +
+           annotate("text", x = covid_date+ 0.3, y = -5, 
+                    label = format(covid_date,"%m-%d"), color = "#EB5353") +
+           annotate("rect", xmin = school2018_s[1], xmax = school2018_s[2],
+                    ymin = 0, ymax = ymax, alpha = .1, fill = "#36AE7C") +
+           annotate("rect", xmin = school2019_f[1], xmax = school2019_f[2],
+                    ymin = 0, ymax = ymax, alpha = .1, fill = "#CE9461") +
+           annotate("rect", xmin = school2019_s[1], xmax = school2019_s[2],
+                    ymin = 0, ymax = ymax, alpha = .1, fill = "#36AE7C") +
+           annotate("rect", xmin = school2020_f[1], xmax = school2020_f[2],
+                    ymin = 0, ymax = ymax, alpha = .1, fill = "#CE9461") +
+           annotate("rect", xmin = school2020_s[1], xmax = school2020_s[2],
+                    ymin = 0, ymax = ymax, alpha = .1, fill = "#36AE7C") +
+           annotate("rect", xmin = school2021[1], xmax = school2021[2],
+                    ymin = 0, ymax = ymax, alpha = .1, fill = "#CE9461") +
            theme_bw() +
-           geom_point() +
-           geom_line() +
+           geom_point(alpha=0.7) +
+           geom_line(alpha=0.7) +
            xlab("date received") +
            ylab("number of requests") +
            ggtitle("Total Number of Requests and Student Status")

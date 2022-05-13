@@ -18,11 +18,21 @@ source("Code/helper_functions.R")
 
 
 ### STEP 1. orders filled data, daily
+# dat <- orders_allyears_agg_received %>%
+#   dplyr::select(female_small,
+#                 female_large,
+#                 male_small,
+#                 male_large)
+
 dat <- orders_allyears_agg_received %>%
-  dyplr::select(female_small,
-                female_large,
-                male_small,
-                male_large)
+  dplyr::select(female_small,
+                female_large) %>%
+  as.matrix()
+
+dat_male <- orders_allyears_agg_received %>%
+  dplyr::select(male_small,
+                male_large) %>%
+  as.matrix()
 
 #Initial model
 init_mod <- dlm(FF = matrix(c(1, 0), nrow = 1) %x% diag(2), V = diag(2),
@@ -32,11 +42,18 @@ init_mod <- dlm(FF = matrix(c(1, 0), nrow = 1) %x% diag(2), V = diag(2),
                 C0 = diag(x = 3, nrow = 4))
 
 #This can take several hours to run
-orders_np <- SUTSE_mcmc_dlm(dat, init_mod, update_mod = updatemod_invWish_dlm, transformation = "np",
+orders_female_np <- SUTSE_mcmc_dlm(dat, init_mod, update_mod = updatemod_invWish_dlm, transformation = "np",
                                  nsave=10000, nburn=5000, nskip=1, nfc=1, particle = T)
 
 
-save(orders_np, file = here("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_np.RData"))
+save(orders_female_np, file = here("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_female_np.RData"))
 
 ###################################################################
+
+load("D:/GitHub/note-in-the-pocket/orders_filled_forecasting/orders_np.RData")
+str(orders_np$post_pred)
+
+######### Try running a separate model for orders_weekly_agg_received using covariates? 
+
+
 
