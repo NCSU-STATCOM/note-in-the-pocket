@@ -8,11 +8,9 @@ library(dplyr)
 library(ggrepel)
 library(viridis)
 library(tidyverse)
+library(here)
 
-#Change as need be
-dir<-"~/STATCOM/NoteInThePocket/"
-
-orddf<-read.csv(paste0(dir,"merged_CDC_NP.csv"))
+orddf<-read.csv(here("intermediary_data", "merged_CDC_NP.csv"))
 ```
 
 \textbf{Proportion of Orders for Gender, Size by School:}

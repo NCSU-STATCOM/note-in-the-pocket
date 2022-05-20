@@ -36,6 +36,10 @@ Because there are zip code maps in the following section, I include a map of the
 ```{r child = 'EDA/EDA for the categorical variables.Rmd'}
 ```
 
+\newpage
+
+```{r child = "EDA/JKoerner_EDA_Plots.Rmd"}
+```
 
 
 
