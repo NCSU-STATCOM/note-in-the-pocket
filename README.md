@@ -1,5 +1,7 @@
 # note-in-the-pocket
-STATCOM project Spring 2022. We worked with the Raleigh nonprofit Note in the Pocket to analyze requests fulfilled by the organization from January 2019-September 2021. We examined three main themes: the trend of the number of requests over time, the lag times of fulfilling those requests, and the number of requests by categories such as School, Organization, and ZIP Code.
+STATCOM project Spring 2022. 
+
+We worked with the Raleigh nonprofit Note in the Pocket to analyze requests fulfilled by the organization from January 2019-September 2021. We examined three main themes: the trend of the number of requests over time, the lag times of fulfilling those requests, and the number of requests by categories such as School, Organization, and ZIP Code.
 
 See final_report.pdf for the complete exploratory data analysis.
 
